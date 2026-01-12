@@ -1,41 +1,23 @@
-# Fly.io configuration file
-app = "market-research-survey"
+# fly.toml app configuration file generated for nonprofit-market-research on 2026-01-12T08:56:12Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'nonprofit-market-research'
+primary_region = 'ord'
 
 [build]
-  dockerfile = "Dockerfile"
 
-[env]
-  # Streamlit configuration
-  STREAMLIT_SERVER_PORT = "8501"
-  STREAMLIT_SERVER_ADDRESS = "0.0.0.0"
-  STREAMLIT_SERVER_HEADLESS = "true"
-
-[[services]]
+[http_service]
   internal_port = 8501
-  protocol = "tcp"
+  force_https = true
+  auto_stop_machines = 'stop'
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
 
-  [[services.ports]]
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
-
-  [services.concurrency]
-    type = "connections"
-    hard_limit = 25
-    soft_limit = 20
-
-  [[services.tcp_checks]]
-    interval = "15s"
-    timeout = "2s"
-    grace_period = "5s"
-
-  [[services.http_checks]]
-    interval = "30s"
-    timeout = "5s"
-    grace_period = "10s"
-    method = "get"
-    path = "/_stcore/health"
-    protocol = "http"
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+  memory_mb = 1024
