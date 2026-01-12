@@ -28,7 +28,7 @@ FORMS = {
 QUESTIONS = [
     {
         "id": "q1",
-        "text": "Which name do you like most overall?"
+        "text": "Which name is the most memorable?"
     },
     {
         "id": "q2",
@@ -44,7 +44,7 @@ QUESTIONS = [
     },
     {
         "id": "q5",
-        "text": "Which name is the most memorable?"
+        "text": "Which name do you like most overall?"
     }
 ]
 

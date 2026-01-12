@@ -44,8 +44,19 @@ def get_connection():
     finally:
         _pool.putconn(conn)
 
-
 def init_database():
+    """Initialize database connection to check for problems"""
+    with get_connection() as conn:
+        with conn.cursor() as cur:
+            cur.execute("SELECT 1")
+            result = cur.fetchone()
+            if result:
+                print("Database connection successful")
+            else:
+                print("Database connection failed")
+
+
+def init_database_tables():
     """Initialize database tables and form_counters."""
     with get_connection() as conn:
         with conn.cursor() as cur:
@@ -186,3 +197,43 @@ def get_form_statistics() -> Dict[int, int]:
             """)
             results = cur.fetchall()
             return {row['form_id']: row['submission_count'] for row in results}
+
+
+def get_question_rankings():
+    """
+    Get top 3 and bottom 3 names for each question.
+    Returns a dict with question IDs as keys and rankings as values.
+    """
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            rankings = {}
+            
+            for question_num in range(1, 6):
+                column_name = f"question_{question_num}_answer"
+                
+                # Get top 3
+                cur.execute(f"""
+                    SELECT {column_name} as name, COUNT(*) as count
+                    FROM submissions
+                    GROUP BY {column_name}
+                    ORDER BY count DESC, {column_name}
+                    LIMIT 3
+                """)
+                top_3 = cur.fetchall()
+                
+                # Get bottom 3
+                cur.execute(f"""
+                    SELECT {column_name} as name, COUNT(*) as count
+                    FROM submissions
+                    GROUP BY {column_name}
+                    ORDER BY count ASC, {column_name}
+                    LIMIT 3
+                """)
+                bottom_3 = cur.fetchall()
+                
+                rankings[f"q{question_num}"] = {
+                    "top_3": [{"name": row["name"], "count": row["count"]} for row in top_3],
+                    "bottom_3": [{"name": row["name"], "count": row["count"]} for row in bottom_3]
+                }
+            
+            return rankings
