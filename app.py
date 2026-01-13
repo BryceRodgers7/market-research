@@ -133,7 +133,7 @@ def display_survey():
         submitted = st.form_submit_button("Submit Survey", use_container_width=True)
         
         # Display form title
-        # st.write("Note: this is " + form_title + ". This note will be removed when deploying to production.")
+        st.write("Note: You can take this survey again, with a different set of names on the next page.")
 
         if submitted:
             # Validate all questions are answered
@@ -249,7 +249,8 @@ def main():
     
     # App header
     st.title("📊 Research Survey")
-    st.write("This app is a matching platform designed to help people and companies discover nonprofits that align with their values and interests. We are looking for a name that appeals to both individual users and corporations, reflecting the app’s mission to connect them with meaningful causes. Please answer the following questions to help us find a name that captures these goals.")
+    st.write("Hi there, we are building an app and need to choose a name for it. Please help us by answering the following questions.")
+    st.write("Our app is a matching platform designed to help people and companies discover nonprofits that align with their values and interests. We are looking for a name that appeals to both individual users and corporations, reflecting the app’s mission to connect them with meaningful causes. Please answer the following questions to help us find a name that captures these goals.")
     st.write("")
     
     # Button to get new form
