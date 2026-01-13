@@ -133,7 +133,7 @@ def display_survey():
         submitted = st.form_submit_button("Submit Survey", use_container_width=True)
         
         # Display form title
-        st.write("Note: this is " + form_title + ". This note will be removed when deploying to production.")
+        # st.write("Note: this is " + form_title + ". This note will be removed when deploying to production.")
 
         if submitted:
             # Validate all questions are answered

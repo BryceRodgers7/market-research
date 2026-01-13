@@ -10,6 +10,8 @@ from psycopg2.extras import RealDictCursor
 _pool: Optional[SimpleConnectionPool] = None
 
 
+
+
 def get_database_url() -> str:
     """Get database URL from environment variable."""
     database_url = os.environ.get("DATABASE_URL")
@@ -128,6 +130,11 @@ def get_least_submitted_form() -> int:
     """
     with get_connection() as conn:
         with conn.cursor() as cur:
+            # First check what's in the table
+            cur.execute("SELECT form_id, submission_count FROM form_counters ORDER BY form_id")
+            all_forms = cur.fetchall()
+            print(f"Current form_counters state: {all_forms}")
+            
             # Find form with minimum submission count, break ties by oldest last_assigned
             cur.execute("""
                 SELECT form_id 
@@ -140,6 +147,7 @@ def get_least_submitted_form() -> int:
             
             if result:
                 form_id = result[0]
+                print(f"Assigning form {form_id} (least submitted)")
                 # Update last_assigned timestamp
                 cur.execute("""
                     UPDATE form_counters 
@@ -149,8 +157,21 @@ def get_least_submitted_form() -> int:
                 conn.commit()
                 return form_id
             else:
-                # Fallback to form 1 if no forms found (shouldn't happen)
-                return 1
+                # If no forms exist, initialize them now
+                print("WARNING: No forms found in form_counters, initializing now...")
+                try:
+                    for form_id in range(1, 7):
+                        cur.execute("""
+                            INSERT INTO form_counters (form_id, submission_count, last_assigned)
+                            VALUES (%s, 0, NULL)
+                            ON CONFLICT (form_id) DO NOTHING
+                        """, (form_id,))
+                    conn.commit()
+                    print("Initialized form_counters with forms 1-6")
+                    return 1  # Return form 1 as default
+                except Exception as e:
+                    print(f"Error initializing form_counters: {e}")
+                    return 1
 
 
 def save_submission(
@@ -197,13 +218,42 @@ def save_submission(
                     top_choice,
                     bottom_choice
                 ))
+
+                print(f"Submission saved for form {form_id} with session {session_id}")
                 
-                # Increment form counter
-                cur.execute("""
-                    UPDATE form_counters 
-                    SET submission_count = submission_count + 1 
-                    WHERE form_id = %s
-                """, (form_id,))
+                # Increment form counter with error handling
+                try:
+                    # First ensure the form_counter row exists
+                    cur.execute("""
+                        INSERT INTO form_counters (form_id, submission_count, last_assigned)
+                        VALUES (%s, 0, NULL)
+                        ON CONFLICT (form_id) DO NOTHING
+                    """, (form_id,))
+                    insert_affected = cur.rowcount
+                    if insert_affected > 0:
+                        print(f"Inserted new row for form_id {form_id} in form_counters")
+                    
+                    # Now increment it
+                    cur.execute("""
+                        UPDATE form_counters 
+                        SET submission_count = submission_count + 1 
+                        WHERE form_id = %s
+                    """, (form_id,))
+                    
+                    update_affected = cur.rowcount
+                    if update_affected > 0:
+                        # Get the new count
+                        cur.execute("SELECT submission_count FROM form_counters WHERE form_id = %s", (form_id,))
+                        new_count = cur.fetchone()[0]
+                        print(f"Form counter incremented for form {form_id}: now at {new_count} submissions")
+                    else:
+                        print(f"WARNING: UPDATE didn't affect any rows for form_id {form_id}")
+                except Exception as counter_error:
+                    print(f"Error updating form counter for form {form_id}: {counter_error}")
+                    print(f"Error type: {type(counter_error).__name__}")
+                    import traceback
+                    traceback.print_exc()
+                    print(f"Submission was still saved successfully")
                 
                 conn.commit()
                 return True
