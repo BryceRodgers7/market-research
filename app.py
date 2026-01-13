@@ -67,6 +67,37 @@ def display_survey():
     
     # Create the form
     with st.form("survey_form"):
+        st.write("### The names you will be evaluating:")
+        st.write("")
+        
+        # Display the 4 names in a 2x2 grid
+        st.markdown("""
+            <style>
+            .names-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 1rem;
+                margin-bottom: 2rem;
+                text-align: center;
+            }
+            .name-item {
+                padding: 1rem;
+                background-color: #f0f2f6;
+                border-radius: 0.5rem;
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        
+        # Create HTML for names grid
+        names_html = '<div class="names-grid">'
+        for name in form_names:
+            names_html += f'<div class="name-item">{name}</div>'
+        names_html += '</div>'
+        
+        st.markdown(names_html, unsafe_allow_html=True)
+        
         st.write("### Please answer the following questions:")
         st.write("")
         
