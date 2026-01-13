@@ -91,8 +91,8 @@ def init_database_tables():
             count = cur.fetchone()[0]
             
             if count == 0:
-                # Insert initial form counters (1-4)
-                for form_id in range(1, 5):
+                # Insert initial form counters (1-6)
+                for form_id in range(1, 7):
                     cur.execute("""
                         INSERT INTO form_counters (form_id, submission_count, last_assigned)
                         VALUES (%s, 0, NULL)
@@ -124,7 +124,7 @@ def init_database_tables():
 def get_least_submitted_form() -> int:
     """
     Get the form_id with the least submissions.
-    Returns form_id (1-4).
+    Returns form_id (1-6).
     """
     with get_connection() as conn:
         with conn.cursor() as cur:
@@ -164,7 +164,7 @@ def save_submission(
     Save a submission to the database and increment form counter.
     
     Args:
-        form_id: The form ID (1-4)
+        form_id: The form ID (1-6)
         session_id: User's session ID
         answers: Dictionary with keys 'q1', 'q2', 'q3', 'q4', 'q5' and their selected names
         top_choice: Optional open-ended response about top choice

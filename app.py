@@ -38,6 +38,13 @@ def load_new_form():
         st.session_state.current_form_id = form_id
         st.session_state.submission_success = False
         st.session_state.answers = {}
+        
+        # Clear all previous question answers
+        questions = forms_config.get_questions()
+        for question in questions:
+            answer_key = f"question_{question['id']}"
+            st.session_state[answer_key] = None
+        
         return True
     except Exception as e:
         st.error(f"Error loading form: {e}")
@@ -64,16 +71,49 @@ def display_survey():
         
         answers = {}
         
-        # Display each question with radio buttons
+        # Display each question with options in a 2x2 matrix
         for i, question in enumerate(questions, 1):
             st.write(f"**Question {i}:** {question['text']}")
-            answer = st.radio(
-                label="Select your answer:",
-                options=form_names,
-                key=f"question_{question['id']}",
-                label_visibility="collapsed"
-            )
-            answers[question['id']] = answer
+            
+            # Initialize answer in session state if not present
+            answer_key = f"question_{question['id']}"
+            if answer_key not in st.session_state:
+                st.session_state[answer_key] = None
+            
+            # Create 2x2 matrix of buttons
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Top-left button
+                if st.button(form_names[0], key=f"{answer_key}_0", use_container_width=True, 
+                            type="primary" if st.session_state[answer_key] == form_names[0] else "secondary"):
+                    st.session_state[answer_key] = form_names[0]
+                    st.rerun()
+                
+                # Bottom-left button
+                if len(form_names) > 2:
+                    if st.button(form_names[2], key=f"{answer_key}_2", use_container_width=True,
+                                type="primary" if st.session_state[answer_key] == form_names[2] else "secondary"):
+                        st.session_state[answer_key] = form_names[2]
+                        st.rerun()
+            
+            with col2:
+                # Top-right button
+                if len(form_names) > 1:
+                    if st.button(form_names[1], key=f"{answer_key}_1", use_container_width=True,
+                                type="primary" if st.session_state[answer_key] == form_names[1] else "secondary"):
+                        st.session_state[answer_key] = form_names[1]
+                        st.rerun()
+                
+                # Bottom-right button
+                if len(form_names) > 3:
+                    if st.button(form_names[3], key=f"{answer_key}_3", use_container_width=True,
+                                type="primary" if st.session_state[answer_key] == form_names[3] else "secondary"):
+                        st.session_state[answer_key] = form_names[3]
+                        st.rerun()
+            
+            # Store the answer
+            answers[question['id']] = st.session_state[answer_key]
             st.write("")  # Add spacing
         
         # Optional open-ended questions
@@ -110,8 +150,10 @@ def display_survey():
 
         if submitted:
             # Validate all questions are answered
-            if all(answers.values()):
-                # Save to database (optional fields can be None or empty string)
+            unanswered = [i+1 for i, (q_id, answer) in enumerate(answers.items()) if not answer]
+            
+            if not unanswered:
+                # All questions answered - save to database
                 success = database.save_submission(
                     form_id=form_id,
                     session_id=st.session_state.session_id,
@@ -127,7 +169,11 @@ def display_survey():
                 else:
                     st.error("Failed to save submission. Please try again.")
             else:
-                st.error("Please answer all questions before submitting.")
+                # Show which questions need answers
+                if len(unanswered) == 1:
+                    st.error(f"⚠️ Please answer Question {unanswered[0]} before submitting.")
+                else:
+                    st.error(f"⚠️ Please answer all questions before submitting. Missing: Questions {', '.join(map(str, unanswered))}")
 
 
 def display_success_message():

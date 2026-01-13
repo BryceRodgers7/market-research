@@ -3,25 +3,31 @@ Configuration for survey forms and questions.
 Each form has 4 unique names, and all forms share the same 5 questions.
 """
 
-# Define the 4 forms with their respective names
-# Each form has 4 different names (16 unique names total)
 FORMS = {
     1: {
-        "names": ["Aurora", "Beacon", "Catalyst", "Delta"],
+        "names": ["Philanthrifind","Give-io","Donathropy","Kinderfully"],
         "title": "Survey Form A"
-    },
+    }
     2: {
-        "names": ["Evergreen", "Fusion", "Genesis", "Harmony"],
+        "names": ["Philanthrifound","Causenex","Givanthropy","Tomatchin"],
         "title": "Survey Form B"
     },
     3: {
-        "names": ["Innovate", "Journey", "Keystone", "Legacy"],
+        "names": ["Philanthri","Give Connects","Donanthropy","Humanitable"],
         "title": "Survey Form C"
     },
     4: {
-        "names": ["Momentum", "Nexus", "Odyssey", "Pinnacle"],
+        "names": ["Givio Gives","Philanthrifound","Givanthropy","Humanitable"],
         "title": "Survey Form D"
-    }
+    },
+    5: {
+        "names": ["Give Connects","Philanthrifind","Give-io","Tomatchin"],
+        "title": "Survey Form E"
+    },
+    6: {
+        "names": ["Philanthri","Givio Gives","Kinderfully","Causenex"],
+        "title": "Survey Form F"
+    },
 }
 
 # The 5 questions asked for each form
