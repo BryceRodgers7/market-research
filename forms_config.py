@@ -36,15 +36,15 @@ QUESTIONS = [
     },
     {
         "id": "q3",
-        "text": "Which name sounds the most professional?"
+        "text": "Which name are you most curious to learn more about?"
     },
     {
         "id": "q4",
-        "text": "Which name would you be most likely to recommend?"
+        "text": "Which name are you most likely to try or sign up for?"
     },
     {
         "id": "q5",
-        "text": "Which name do you like most overall?"
+        "text": "Overall, which name do you like best?"
     }
 ]
 

@@ -80,7 +80,9 @@ def init_database_tables():
                     question_2_answer VARCHAR(255) NOT NULL,
                     question_3_answer VARCHAR(255) NOT NULL,
                     question_4_answer VARCHAR(255) NOT NULL,
-                    question_5_answer VARCHAR(255) NOT NULL
+                    question_5_answer VARCHAR(255) NOT NULL,
+                    top_choice TEXT,
+                    bottom_choice TEXT
                 )
             """)
             
@@ -95,6 +97,26 @@ def init_database_tables():
                         INSERT INTO form_counters (form_id, submission_count, last_assigned)
                         VALUES (%s, 0, NULL)
                     """, (form_id,))
+            
+            # Migration: Add new optional columns if they don't exist
+            cur.execute("""
+                DO $$
+                BEGIN
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name='submissions' AND column_name='top_choice'
+                    ) THEN
+                        ALTER TABLE submissions ADD COLUMN top_choice TEXT;
+                    END IF;
+                    
+                    IF NOT EXISTS (
+                        SELECT 1 FROM information_schema.columns 
+                        WHERE table_name='submissions' AND column_name='bottom_choice'
+                    ) THEN
+                        ALTER TABLE submissions ADD COLUMN bottom_choice TEXT;
+                    END IF;
+                END $$;
+            """)
             
             conn.commit()
 
@@ -134,7 +156,9 @@ def get_least_submitted_form() -> int:
 def save_submission(
     form_id: int,
     session_id: str,
-    answers: Dict[str, str]
+    answers: Dict[str, str],
+    top_choice: Optional[str] = None,
+    bottom_choice: Optional[str] = None
 ) -> bool:
     """
     Save a submission to the database and increment form counter.
@@ -143,6 +167,8 @@ def save_submission(
         form_id: The form ID (1-4)
         session_id: User's session ID
         answers: Dictionary with keys 'q1', 'q2', 'q3', 'q4', 'q5' and their selected names
+        top_choice: Optional open-ended response about top choice
+        bottom_choice: Optional open-ended response about confusing/untrustworthy names
     
     Returns:
         True if successful, False otherwise
@@ -155,9 +181,10 @@ def save_submission(
                     INSERT INTO submissions (
                         form_id, session_id, submission_datetime,
                         question_1_answer, question_2_answer, question_3_answer,
-                        question_4_answer, question_5_answer
+                        question_4_answer, question_5_answer,
+                        top_choice, bottom_choice
                     ) VALUES (
-                        %s, %s, NOW(), %s, %s, %s, %s, %s
+                        %s, %s, NOW(), %s, %s, %s, %s, %s, %s, %s
                     )
                 """, (
                     form_id,
@@ -166,7 +193,9 @@ def save_submission(
                     answers['q2'],
                     answers['q3'],
                     answers['q4'],
-                    answers['q5']
+                    answers['q5'],
+                    top_choice,
+                    bottom_choice
                 ))
                 
                 # Increment form counter

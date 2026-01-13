@@ -76,6 +76,32 @@ def display_survey():
             answers[question['id']] = answer
             st.write("")  # Add spacing
         
+        # Optional open-ended questions
+        st.write("---")
+        st.write("### Optional Questions")
+        st.write("*(You may skip these if you prefer)*")
+        st.write("")
+        
+        st.write("**Which is your top choice and what stood out to you about it?**")
+        top_choice = st.text_area(
+            label="Top choice response:",
+            max_chars=2000,
+            key="top_choice",
+            label_visibility="collapsed",
+            placeholder="Optional: Share your thoughts here..."
+        )
+        st.write("")
+        
+        st.write("**Were there any names that felt confusing, untrustworthy, or off-putting? If so, which and why?**")
+        bottom_choice = st.text_area(
+            label="Bottom choice response:",
+            max_chars=2000,
+            key="bottom_choice",
+            label_visibility="collapsed",
+            placeholder="Optional: Share your thoughts here..."
+        )
+        st.write("")
+        
         # Submit button
         submitted = st.form_submit_button("Submit Survey", use_container_width=True)
         
@@ -85,11 +111,13 @@ def display_survey():
         if submitted:
             # Validate all questions are answered
             if all(answers.values()):
-                # Save to database
+                # Save to database (optional fields can be None or empty string)
                 success = database.save_submission(
                     form_id=form_id,
                     session_id=st.session_state.session_id,
-                    answers=answers
+                    answers=answers,
+                    top_choice=top_choice if top_choice.strip() else None,
+                    bottom_choice=bottom_choice if bottom_choice.strip() else None
                 )
                 
                 if success:
@@ -188,7 +216,7 @@ def main():
     
     # App header
     st.title("📊 Research Survey")
-    st.write("Our app is a matching platform that helps people discover new nonprofit organizations and identify which ones align with their interests. It will also facilitate any donations from both individuals and companies. Please answer the following questions to help us find a name that captures this goal..")
+    st.write("This app is a matching platform designed to help people and companies discover nonprofits that align with their values and interests. We are looking for a name that appeals to both individual users and corporations, reflecting the app’s mission to connect them with meaningful causes. Please answer the following questions to help us find a name that captures these goals.")
     st.write("")
     
     # Button to get new form
