@@ -39,11 +39,12 @@ def load_new_form():
         st.session_state.submission_success = False
         st.session_state.answers = {}
         
-        # Clear all previous question answers
+        # Clear all previous question answers (for radio buttons)
         questions = forms_config.get_questions()
         for question in questions:
             answer_key = f"question_{question['id']}"
-            st.session_state[answer_key] = None
+            if answer_key in st.session_state:
+                del st.session_state[answer_key]
         
         return True
     except Exception as e:
@@ -71,49 +72,35 @@ def display_survey():
         
         answers = {}
         
-        # Display each question with options in a 2x2 matrix
+        # Add CSS to style radio buttons in 2x2 grid
+        st.markdown("""
+            <style>
+            div[data-testid="stRadio"] > div {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.5rem !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        
+        # Display each question with radio buttons in a 2x2 grid
         for i, question in enumerate(questions, 1):
             st.write(f"**Question {i}:** {question['text']}")
             
             # Initialize answer in session state if not present
             answer_key = f"question_{question['id']}"
-            if answer_key not in st.session_state:
-                st.session_state[answer_key] = None
             
-            # Create 2x2 matrix of buttons
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                # Top-left button
-                if st.button(form_names[0], key=f"{answer_key}_0", use_container_width=True, 
-                            type="primary" if st.session_state[answer_key] == form_names[0] else "secondary"):
-                    st.session_state[answer_key] = form_names[0]
-                    st.rerun()
-                
-                # Bottom-left button
-                if len(form_names) > 2:
-                    if st.button(form_names[2], key=f"{answer_key}_2", use_container_width=True,
-                                type="primary" if st.session_state[answer_key] == form_names[2] else "secondary"):
-                        st.session_state[answer_key] = form_names[2]
-                        st.rerun()
-            
-            with col2:
-                # Top-right button
-                if len(form_names) > 1:
-                    if st.button(form_names[1], key=f"{answer_key}_1", use_container_width=True,
-                                type="primary" if st.session_state[answer_key] == form_names[1] else "secondary"):
-                        st.session_state[answer_key] = form_names[1]
-                        st.rerun()
-                
-                # Bottom-right button
-                if len(form_names) > 3:
-                    if st.button(form_names[3], key=f"{answer_key}_3", use_container_width=True,
-                                type="primary" if st.session_state[answer_key] == form_names[3] else "secondary"):
-                        st.session_state[answer_key] = form_names[3]
-                        st.rerun()
+            # Radio buttons will display in 2x2 grid thanks to CSS
+            answer = st.radio(
+                label=f"Select your choice:",
+                options=form_names,
+                key=answer_key,
+                label_visibility="collapsed",
+                index=None  # No default selection
+            )
             
             # Store the answer
-            answers[question['id']] = st.session_state[answer_key]
+            answers[question['id']] = answer
             st.write("")  # Add spacing
         
         # Optional open-ended questions
