@@ -7,7 +7,7 @@ FORMS = {
     1: {
         "names": ["Philanthrifind","Give-io","Donathropy","Kinderfully"],
         "title": "Survey Form A"
-    }
+    },
     2: {
         "names": ["Philanthrifound","Causenex","Givanthropy","Tomatchin"],
         "title": "Survey Form B"
@@ -27,7 +27,7 @@ FORMS = {
     6: {
         "names": ["Philanthri","Givio Gives","Kinderfully","Causenex"],
         "title": "Survey Form F"
-    },
+    }
 }
 
 # The 5 questions asked for each form
