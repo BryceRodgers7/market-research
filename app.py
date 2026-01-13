@@ -280,7 +280,7 @@ def main():
     
     # App header
     st.title("📊 Research Survey")
-    st.write("Hi there, we are building an app and need to choose a name for it. Please help us by answering the following questions.")
+    st.write("Hi there, we are building an app and need to choose a name for it. Please help us by taking this survey and answering a couple questions.")
     st.write("Our app is a matching platform designed to help people and companies discover nonprofits that align with their values and interests. We are looking for a name that appeals to both individual users and corporations, reflecting the app’s mission to connect them with meaningful causes. Please answer the following questions to help us find a name that captures these goals.")
     st.write("")
     
