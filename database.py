@@ -278,6 +278,94 @@ def get_form_statistics() -> Dict[int, int]:
             return {row['form_id']: row['submission_count'] for row in results}
 
 
+def get_worst_performing_names(question_num: int):
+    """
+    Get the 3 worst performing names for a specific question based on exposure vs votes gap.
+    Names with the largest gap between exposures and votes are the worst performers.
+    
+    Args:
+        question_num: Question number (1-5)
+    
+    Returns:
+        List of dicts with name, exposure_count, vote_count, and gap
+    """
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            # Build the exposure counting query dynamically based on forms_config
+            # This maps each form to its names
+            form_names = {
+                1: ['Philanthrifind', 'Give-io', 'Donathropy', 'Kinderfully'],
+                2: ['Philanthrifound', 'Causenex', 'Givanthropy', 'Tomatchin'],
+                3: ['Philanthri', 'Give Connects', 'Donanthropy', 'Humanitable'],
+                4: ['Givio Gives', 'Philanthrifound', 'Givanthropy', 'Humanitable'],
+                5: ['Give Connects', 'Philanthrifind', 'Give-io', 'Tomatchin'],
+                6: ['Philanthri', 'Givio Gives', 'Kinderfully', 'Causenex']
+            }
+            
+            column_name = f"question_{question_num}_answer"
+            
+            cur.execute(f"""
+                WITH name_exposures AS (
+                    -- Count how many times each name was exposed (shown on a form that was submitted)
+                    SELECT 
+                        name,
+                        COUNT(*) as exposure_count
+                    FROM (
+                        -- Form 1
+                        SELECT 'Philanthrifind' as name FROM submissions WHERE form_id = 1
+                        UNION ALL SELECT 'Give-io' FROM submissions WHERE form_id = 1
+                        UNION ALL SELECT 'Donathropy' FROM submissions WHERE form_id = 1
+                        UNION ALL SELECT 'Kinderfully' FROM submissions WHERE form_id = 1
+                        -- Form 2
+                        UNION ALL SELECT 'Philanthrifound' FROM submissions WHERE form_id = 2
+                        UNION ALL SELECT 'Causenex' FROM submissions WHERE form_id = 2
+                        UNION ALL SELECT 'Givanthropy' FROM submissions WHERE form_id = 2
+                        UNION ALL SELECT 'Tomatchin' FROM submissions WHERE form_id = 2
+                        -- Form 3
+                        UNION ALL SELECT 'Philanthri' FROM submissions WHERE form_id = 3
+                        UNION ALL SELECT 'Give Connects' FROM submissions WHERE form_id = 3
+                        UNION ALL SELECT 'Donanthropy' FROM submissions WHERE form_id = 3
+                        UNION ALL SELECT 'Humanitable' FROM submissions WHERE form_id = 3
+                        -- Form 4
+                        UNION ALL SELECT 'Givio Gives' FROM submissions WHERE form_id = 4
+                        UNION ALL SELECT 'Philanthrifound' FROM submissions WHERE form_id = 4
+                        UNION ALL SELECT 'Givanthropy' FROM submissions WHERE form_id = 4
+                        UNION ALL SELECT 'Humanitable' FROM submissions WHERE form_id = 4
+                        -- Form 5
+                        UNION ALL SELECT 'Give Connects' FROM submissions WHERE form_id = 5
+                        UNION ALL SELECT 'Philanthrifind' FROM submissions WHERE form_id = 5
+                        UNION ALL SELECT 'Give-io' FROM submissions WHERE form_id = 5
+                        UNION ALL SELECT 'Tomatchin' FROM submissions WHERE form_id = 5
+                        -- Form 6
+                        UNION ALL SELECT 'Philanthri' FROM submissions WHERE form_id = 6
+                        UNION ALL SELECT 'Givio Gives' FROM submissions WHERE form_id = 6
+                        UNION ALL SELECT 'Kinderfully' FROM submissions WHERE form_id = 6
+                        UNION ALL SELECT 'Causenex' FROM submissions WHERE form_id = 6
+                    ) AS all_exposures
+                    GROUP BY name
+                ),
+                name_votes AS (
+                    -- Count how many votes each name received for this specific question
+                    SELECT 
+                        {column_name} as name,
+                        COUNT(*) as vote_count
+                    FROM submissions
+                    GROUP BY {column_name}
+                )
+                SELECT 
+                    ne.name,
+                    ne.exposure_count,
+                    COALESCE(nv.vote_count, 0) as vote_count,
+                    ne.exposure_count - COALESCE(nv.vote_count, 0) as gap
+                FROM name_exposures ne
+                LEFT JOIN name_votes nv ON ne.name = nv.name
+                ORDER BY gap DESC, ne.name
+                LIMIT 3
+            """)
+            
+            return cur.fetchall()
+
+
 def get_question_rankings():
     """
     Get top 3 and bottom 3 names for each question.
@@ -300,19 +388,13 @@ def get_question_rankings():
                 """)
                 top_3 = cur.fetchall()
                 
-                # Get bottom 3
-                cur.execute(f"""
-                    SELECT {column_name} as name, COUNT(*) as count
-                    FROM submissions
-                    GROUP BY {column_name}
-                    ORDER BY count ASC, {column_name}
-                    LIMIT 3
-                """)
-                bottom_3 = cur.fetchall()
+                # Get bottom 3 (worst performers based on exposure vs votes gap)
+                worst_3 = get_worst_performing_names(question_num)
                 
                 rankings[f"q{question_num}"] = {
                     "top_3": [{"name": row["name"], "count": row["count"]} for row in top_3],
-                    "bottom_3": [{"name": row["name"], "count": row["count"]} for row in bottom_3]
+                    "bottom_3": [{"name": row["name"], "exposure_count": row["exposure_count"], 
+                                  "vote_count": row["vote_count"], "gap": row["gap"]} for row in worst_3]
                 }
             
             return rankings

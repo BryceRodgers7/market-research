@@ -245,11 +245,11 @@ def display_results_page():
                 
                 st.write("")
                 
-                # Display bottom 3
-                st.write("**Bottom 3 Names:**")
+                # Display bottom 3 (worst performers by exposure vs votes gap)
+                st.write("**Bottom 3 Names (by exposure-vote gap):**")
                 if data["bottom_3"]:
                     for j, item in enumerate(data["bottom_3"], 1):
-                        st.write(f"{j}. {item['name']} - {item['count']} votes")
+                        st.write(f"{j}. {item['name']} - {item['exposure_count']} exposures, {item['vote_count']} votes (gap: {item['gap']})")
                 else:
                     st.write("No data yet")
                 
