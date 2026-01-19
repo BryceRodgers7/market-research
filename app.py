@@ -82,10 +82,12 @@ def display_survey():
             }
             .name-item {
                 padding: 1rem;
-                background-color: #f0f2f6;
+                background-color: var(--secondary-background-color);
+                border: 1px solid var(--border-color, rgba(128, 128, 128, 0.2));
                 border-radius: 0.5rem;
                 font-size: 1.1rem;
                 font-weight: 600;
+                color: var(--text-color);
             }
             </style>
         """, unsafe_allow_html=True)
