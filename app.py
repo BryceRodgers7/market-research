@@ -261,6 +261,86 @@ def display_results_page():
         st.error(f"Error loading rankings: {e}")
 
 
+def display_comments_page():
+    """Display user feedback from top choice and bottom choice columns."""
+    # Set page to wide layout
+    st.set_page_config(layout="wide")
+    
+    st.title("💬 User Feedback")
+    st.write("")
+    
+    try:
+        submissions = database.get_submissions_with_feedback()
+        
+        if not submissions:
+            st.info("No feedback submissions yet.")
+            return
+        
+        st.write(f"### Total Feedback Submissions: {len(submissions)}")
+        st.write("")
+        
+        # Add custom CSS for more compact display
+        st.markdown("""
+            <style>
+            .feedback-box {
+                padding: 0.5rem;
+                border-radius: 0.3rem;
+                margin-bottom: 0.5rem;
+                font-size: 0.9rem;
+                line-height: 1.4;
+            }
+            .names-list {
+                font-size: 0.9rem;
+                font-weight: 600;
+                margin-bottom: 0.5rem;
+            }
+            .answer-item {
+                font-size: 0.85rem;
+                margin: 0.2rem 0;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+        
+        # Display each submission with feedback in 3 columns
+        for idx, submission in enumerate(submissions, 1):
+            form_id = submission['form_id']
+            form_names = forms_config.get_form_names(form_id)
+            
+            st.markdown(f"**Submission #{idx}**")
+            
+            # Create 3 columns: Names/Answers | Top Feedback | Bottom Feedback
+            col1, col2, col3 = st.columns([1.5, 1.5, 1.5])
+            
+            with col1:
+                st.markdown("**Names Evaluated:**")
+                st.markdown(f"_{', '.join(form_names)}_")
+                st.write("")
+                st.markdown("**Answers:**")
+                for i in range(1, 6):
+                    answer_key = f"question_{i}_answer"
+                    answer = submission[answer_key]
+                    st.markdown(f"**Q{i}:** {answer}")
+            
+            with col2:
+                st.markdown("**Top Choice:**")
+                if submission['top_choice']:
+                    st.info(submission['top_choice'])
+                else:
+                    st.write("_No feedback provided_")
+            
+            with col3:
+                st.markdown("**Bottom Choice:**")
+                if submission['bottom_choice']:
+                    st.warning(submission['bottom_choice'])
+                else:
+                    st.write("_No feedback provided_")
+            
+            st.markdown("---")
+    
+    except Exception as e:
+        st.error(f"Error loading feedback: {e}")
+
+
 def main():
     """Main application function."""
     # Initialize database on first run
@@ -278,6 +358,11 @@ def main():
     query_params = st.query_params
     if "page" in query_params and query_params["page"] == "resultsz":
         display_results_page()
+        return
+    
+    # Check if accessing comments page
+    if "page" in query_params and query_params["page"] == "commentsz":
+        display_comments_page()
         return
     
     # App header

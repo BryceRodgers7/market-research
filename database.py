@@ -398,3 +398,30 @@ def get_question_rankings():
                 }
             
             return rankings
+
+
+def get_submissions_with_feedback():
+    """
+    Get all submissions that have non-null top_choice or bottom_choice feedback.
+    Returns list of dicts with all submission details.
+    """
+    with get_connection() as conn:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            cur.execute("""
+                SELECT 
+                    id,
+                    form_id,
+                    session_id,
+                    submission_datetime,
+                    question_1_answer,
+                    question_2_answer,
+                    question_3_answer,
+                    question_4_answer,
+                    question_5_answer,
+                    top_choice,
+                    bottom_choice
+                FROM submissions
+                WHERE top_choice IS NOT NULL OR bottom_choice IS NOT NULL
+                ORDER BY submission_datetime DESC
+            """)
+            return cur.fetchall()
