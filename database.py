@@ -294,11 +294,11 @@ def get_worst_performing_names(question_num: int):
             # Build the exposure counting query dynamically based on forms_config
             # This maps each form to its names
             form_names = {
-                1: ['Philanthrifind', 'Give-io', 'Donathropy', 'Kinderfully'],
-                2: ['Philanthrifound', 'Causenex', 'Givanthropy', 'Tomatchin'],
+                1: ['PhilanthriFind', 'Give-io', 'Donathropy', 'Kinderfully'],
+                2: ['PhilanthriFound', 'Causenex', 'Givanthropy', 'Tomatchin'],
                 3: ['Philanthri', 'Give Connects', 'Donanthropy', 'Humanitable'],
-                4: ['Givio Gives', 'Philanthrifound', 'Givanthropy', 'Humanitable'],
-                5: ['Give Connects', 'Philanthrifind', 'Give-io', 'Tomatchin'],
+                4: ['Givio Gives', 'PhilanthriFound', 'Givanthropy', 'Humanitable'],
+                5: ['Give Connects', 'PhilanthriFind', 'Give-io', 'Tomatchin'],
                 6: ['Philanthri', 'Givio Gives', 'Kinderfully', 'Causenex']
             }
             
@@ -312,12 +312,12 @@ def get_worst_performing_names(question_num: int):
                         COUNT(*) as exposure_count
                     FROM (
                         -- Form 1
-                        SELECT 'Philanthrifind' as name FROM submissions WHERE form_id = 1
+                        SELECT 'PhilanthriFind' as name FROM submissions WHERE form_id = 1
                         UNION ALL SELECT 'Give-io' FROM submissions WHERE form_id = 1
                         UNION ALL SELECT 'Donathropy' FROM submissions WHERE form_id = 1
                         UNION ALL SELECT 'Kinderfully' FROM submissions WHERE form_id = 1
                         -- Form 2
-                        UNION ALL SELECT 'Philanthrifound' FROM submissions WHERE form_id = 2
+                        UNION ALL SELECT 'PhilanthriFound' FROM submissions WHERE form_id = 2
                         UNION ALL SELECT 'Causenex' FROM submissions WHERE form_id = 2
                         UNION ALL SELECT 'Givanthropy' FROM submissions WHERE form_id = 2
                         UNION ALL SELECT 'Tomatchin' FROM submissions WHERE form_id = 2
@@ -328,12 +328,12 @@ def get_worst_performing_names(question_num: int):
                         UNION ALL SELECT 'Humanitable' FROM submissions WHERE form_id = 3
                         -- Form 4
                         UNION ALL SELECT 'Givio Gives' FROM submissions WHERE form_id = 4
-                        UNION ALL SELECT 'Philanthrifound' FROM submissions WHERE form_id = 4
+                        UNION ALL SELECT 'PhilanthriFound' FROM submissions WHERE form_id = 4
                         UNION ALL SELECT 'Givanthropy' FROM submissions WHERE form_id = 4
                         UNION ALL SELECT 'Humanitable' FROM submissions WHERE form_id = 4
                         -- Form 5
                         UNION ALL SELECT 'Give Connects' FROM submissions WHERE form_id = 5
-                        UNION ALL SELECT 'Philanthrifind' FROM submissions WHERE form_id = 5
+                        UNION ALL SELECT 'PhilanthriFind' FROM submissions WHERE form_id = 5
                         UNION ALL SELECT 'Give-io' FROM submissions WHERE form_id = 5
                         UNION ALL SELECT 'Tomatchin' FROM submissions WHERE form_id = 5
                         -- Form 6

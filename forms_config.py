@@ -5,11 +5,11 @@ Each form has 4 unique names, and all forms share the same 5 questions.
 
 FORMS = {
     1: {
-        "names": ["Philanthrifind","Give-io","Donathropy","Kinderfully"],
+        "names": ["PhilanthriFind","Give-io","Donathropy","Kinderfully"],
         "title": "Survey Form A"
     },
     2: {
-        "names": ["Philanthrifound","Causenex","Givanthropy","Tomatchin"],
+        "names": ["PhilanthriFound","Causenex","Givanthropy","Tomatchin"],
         "title": "Survey Form B"
     },
     3: {
@@ -17,11 +17,11 @@ FORMS = {
         "title": "Survey Form C"
     },
     4: {
-        "names": ["Givio Gives","Philanthrifound","Givanthropy","Humanitable"],
+        "names": ["Givio Gives","PhilanthriFound","Givanthropy","Humanitable"],
         "title": "Survey Form D"
     },
     5: {
-        "names": ["Give Connects","Philanthrifind","Give-io","Tomatchin"],
+        "names": ["Give Connects","PhilanthriFind","Give-io","Tomatchin"],
         "title": "Survey Form E"
     },
     6: {
